@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mon Téléphone</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- ============================================
+  CONFIGURATION — À REMPLIR AVEC VOS INFOS
+  Suivez le guide en bas de ce fichier
+============================================ -->
+<script>
+  const CONFIG = {
+    // 1. VOS INFOS FIREBASE (firebase.google.com)
+    firebase: {
+      apiKey: "VOTRE_API_KEY",
+      authDomain: "VOTRE_PROJECT.firebaseapp.com",
+      projectId: "VOTRE_PROJECT_ID",
+      storageBucket: "VOTRE_PROJECT.appspot.com",
+      messagingSenderId: "VOTRE_SENDER_ID",
+      appId: "VOTRE_APP_ID"
+    },
+
+    // 2. VOTRE NUMÉRO DE TÉLÉPHONE (pour recevoir les alertes)
+    votreTelephone: "+33600000000",  // ← Mettez votre vrai numéro ici
+
+    // 3. PRÉNOM DE VOTRE FEMME
+    prenomFemme: "Chérie",
+
+    // 4. VOTRE PRÉNOM (affiché sur son écran)
+    votrePrenom: "Mon Mari"
+  };
+</script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #FFF8F0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  .header {
+    width: 100%;
+    background: white;
+    padding: 24px 20px 20px;
+    text-align: center;
+    border-bottom: 3px solid #FFE8CC;
+  }
+
+  .greeting { font-size: 28px; font-weight: 900; color: #3D2B1F; line-height: 1.2; }
+  .greeting span { color: #E07A2F; }
+  .time-display { font-size: 18px; font-weight: 600; color: #9E7B5A; margin-top: 6px; }
+
+  .main {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+  }
+
+  /* SOS */
+  .sos-btn {
+    width: 100%;
+    background: #D62828;
+    border: none;
+    border-radius: 24px;
+    padding: 32px 20px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 0 #9E1B1B, 0 12px 30px rgba(214,40,40,0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+    animation: sosPulse 2s ease-in-out infinite;
+  }
+
+  .sos-btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 #9E1B1B;
+    animation: none;
+  }
+
+  @keyframes sosPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  .sos-icon { font-size: 56px; line-height: 1; }
+  .sos-text { font-size: 32px; font-weight: 900; color: white; letter-spacing: 1px; }
+  .sos-sub { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.85); }
+
+  /* BOUTONS */
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .action-btn {
+    background: white;
+    border: 3px solid #FFE8CC;
+    border-radius: 20px;
+    padding: 24px 16px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 5px 0 #FFE0B2;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .action-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #FFE0B2; }
+  .action-btn.green { border-color: #C8E6C9; box-shadow: 0 5px 0 #A5D6A7; }
+  .action-btn.green:active { box-shadow: 0 1px 0 #A5D6A7; }
+  .action-btn.blue { border-color: #BBDEFB; box-shadow: 0 5px 0 #90CAF9; }
+  .action-btn.blue:active { box-shadow: 0 1px 0 #90CAF9; }
+
+  .btn-icon { font-size: 44px; line-height: 1; }
+  .btn-text { font-size: 17px; font-weight: 800; color: #3D2B1F; text-align: center; line-height: 1.2; }
+
+  /* POSITION */
+  .position-card {
+    background: white;
+    border: 3px solid #FFE8CC;
+    border-radius: 20px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .pos-icon { font-size: 36px; flex-shrink: 0; }
+  .pos-label { font-size: 13px; font-weight: 700; color: #9E7B5A; text-transform: uppercase; }
+  .pos-address { font-size: 15px; font-weight: 700; color: #3D2B1F; margin-top: 3px; line-height: 1.3; }
+  .pos-status { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .pos-dot { width: 8px; height: 8px; border-radius: 50%; background: #2E7D32; animation: blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .pos-ok { font-size: 13px; font-weight: 700; color: #2E7D32; }
+
+  /* MODALS */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center;
+    z-index: 999; padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: white; border-radius: 24px;
+    padding: 32px 24px; width: 100%; max-width: 340px; text-align: center;
+  }
+
+  .modal-icon { font-size: 60px; margin-bottom: 16px; }
+  .modal-title { font-size: 24px; font-weight: 900; color: #3D2B1F; margin-bottom: 10px; }
+  .modal-text { font-size: 16px; font-weight: 600; color: #9E7B5A; line-height: 1.5; margin-bottom: 24px; }
+  .modal-btns { display: flex; flex-direction: column; gap: 12px; }
+
+  .modal-confirm {
+    background: #D62828; color: white; border: none; border-radius: 16px;
+    padding: 18px; font-family: 'Nunito',sans-serif; font-size: 20px; font-weight: 900;
+    cursor: pointer; box-shadow: 0 5px 0 #9E1B1B;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .modal-confirm:active { transform: translateY(4px); box-shadow: 0 1px 0 #9E1B1B; }
+
+  .modal-cancel {
+    background: #F5F5F5; color: #9E7B5A; border: none; border-radius: 16px;
+    padding: 16px; font-family: 'Nunito',sans-serif; font-size: 17px; font-weight: 700; cursor: pointer;
+  }
+
+  .success-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .success-overlay.show { display: flex; }
+
+  .success-box {
+    background: white; border-radius: 24px;
+    padding: 40px 24px; width: 100%; max-width: 340px; text-align: center;
+  }
+  .success-icon { font-size: 80px; margin-bottom: 16px; }
+  .success-title { font-size: 26px; font-weight: 900; color: #1B5E20; margin-bottom: 10px; }
+  .success-text { font-size: 17px; font-weight: 600; color: #5A7A5A; line-height: 1.5; margin-bottom: 24px; }
+
+  .success-close {
+    background: #2E7D32; color: white; border: none; border-radius: 16px;
+    padding: 18px 32px; font-family: 'Nunito',sans-serif; font-size: 18px; font-weight: 800;
+    cursor: pointer; box-shadow: 0 5px 0 #1B5E20; width: 100%;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .success-close:active { transform: translateY(4px); box-shadow: 0 1px 0 #1B5E20; }
+
+  .photo-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: flex-end; justify-content: center; z-index: 1000;
+  }
+  .photo-overlay.show { display: flex; }
+
+  .photo-sheet {
+    background: white; border-radius: 24px 24px 0 0;
+    padding: 28px 24px 40px; width: 100%; max-width: 430px; text-align: center;
+  }
+  .photo-title { font-size: 22px; font-weight: 900; color: #3D2B1F; margin-bottom: 8px; }
+  .photo-sub { font-size: 15px; font-weight: 600; color: #9E7B5A; margin-bottom: 24px; }
+  .photo-btns { display: flex; flex-direction: column; gap: 12px; }
+
+  .photo-btn {
+    background: white; border: 3px solid #FFE8CC; border-radius: 16px;
+    padding: 20px; font-family: 'Nunito',sans-serif; font-size: 18px; font-weight: 800;
+    color: #3D2B1F; cursor: pointer; display: flex; align-items: center; gap: 14px;
+    transition: background 0.15s;
+  }
+  .photo-btn:active { background: #FFF3E0; }
+  .photo-btn-icon { font-size: 32px; }
+
+  .photo-cancel {
+    background: none; border: none; font-family: 'Nunito',sans-serif;
+    font-size: 17px; font-weight: 700; color: #9E7B5A; padding: 16px; cursor: pointer;
+  }
+
+  #fileInput { display: none; }
+
+  /* LOADING */
+  .loading-overlay {
+    position: fixed; inset: 0; background: rgba(255,255,255,0.9);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000; flex-direction: column; gap: 16px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 50px; height: 50px; border: 5px solid #FFE8CC;
+    border-top-color: #E07A2F; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 18px; font-weight: 700; color: #9E7B5A; }
+
+  .toast {
+    position: fixed; bottom: 40px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #3D2B1F; color: white; padding: 14px 24px;
+    border-radius: 50px; font-size: 15px; font-weight: 700;
+    opacity: 0; transition: all 0.3s; z-index: 3000; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .page-bottom { height: 30px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="greeting">Bonjour <span id="prenom">Chérie</span> 💛</div>
+  <div class="time-display" id="timeDisplay">--:-- · --</div>
+</div>
+
+<div class="main">
+
+  <button class="sos-btn" onclick="openSOS()">
+    <div class="sos-icon">🆘</div>
+    <div class="sos-text">AU SECOURS</div>
+    <div class="sos-sub">Appuyez ici si vous avez besoin d'aide</div>
+  </button>
+
+  <div class="btn-row">
+    <button class="action-btn green" onclick="sendPosition()">
+      <div class="btn-icon">📍</div>
+      <div class="btn-text">Envoyer ma position</div>
+    </button>
+    <button class="action-btn blue" onclick="openPhoto()">
+      <div class="btn-icon">📸</div>
+      <div class="btn-text">Envoyer une photo</div>
+    </button>
+  </div>
+
+  <div class="btn-row">
+    <button class="action-btn" onclick="callHusband()">
+      <div class="btn-icon">📞</div>
+      <div class="btn-text">Appeler <span id="btnPrenom">Mon Mari</span></div>
+    </button>
+    <button class="action-btn" onclick="sendOK()">
+      <div class="btn-icon">✅</div>
+      <div class="btn-text">Je vais bien !</div>
+    </button>
+  </div>
+
+  <div class="position-card">
+    <div class="pos-icon">📡</div>
+    <div>
+      <div class="pos-label">Votre position actuelle</div>
+      <div class="pos-address" id="posAddress">Localisation en cours...</div>
+      <div class="pos-status">
+        <div class="pos-dot"></div>
+        <div class="pos-ok" id="posOk">Votre mari vous voit 👀</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-bottom"></div>
+
+<input type="file" id="fileInput" accept="image/*" onchange="photoSelected(this)">
+
+<!-- MODALS -->
+<div class="modal-overlay" id="sosModal">
+  <div class="modal">
+    <div class="modal-icon">🆘</div>
+    <div class="modal-title">Envoyer une alerte ?</div>
+    <div class="modal-text">Votre mari va recevoir un message avec votre position exacte tout de suite.</div>
+    <div class="modal-btns">
+      <button class="modal-confirm" onclick="confirmSOS()">OUI, J'AI BESOIN D'AIDE</button>
+      <button class="modal-cancel" onclick="closeSOS()">Non, c'était une erreur</button>
+    </div>
+  </div>
+</div>
+
+<div class="success-overlay" id="successModal">
+  <div class="success-box">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Message envoyé !</div>
+    <div class="success-text">Votre mari a reçu votre position. Il arrive bientôt.<br><br>Restez où vous êtes.</div>
+    <button class="success-close" onclick="closeSuccess()">D'accord, je reste ici</button>
+  </div>
+</div>
+
+<div class="photo-overlay" id="photoModal">
+  <div class="photo-sheet">
+    <div class="photo-title">Envoyer une photo 📸</div>
+    <div class="photo-sub">Choisissez comment prendre votre photo</div>
+    <div class="photo-btns">
+      <button class="photo-btn" onclick="takePhoto('camera')">
+        <span class="photo-btn-icon">📷</span>
+        Prendre une photo maintenant
+      </button>
+      <button class="photo-btn" onclick="takePhoto('gallery')">
+        <span class="photo-btn-icon">🖼️</span>
+        Choisir depuis mes photos
+      </button>
+      <button class="photo-cancel" onclick="closePhoto()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Envoi en cours...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+  import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+  import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js';
+
+  // Init Firebase
+  const app = initializeApp(CONFIG.firebase);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // Rendre disponible globalement
+  window.db = db;
+  window.storage = storage;
+  window.fbCollection = collection;
+  window.fbAddDoc = addDoc;
+  window.fbServerTimestamp = serverTimestamp;
+  window.fbRef = ref;
+  window.fbUploadBytes = uploadBytes;
+  window.fbGetDownloadURL = getDownloadURL;
+  window.firebaseReady = true;
+
+  console.log('✅ Firebase connecté');
+</script>
+
+<script>
+  // Appliquer config
+  document.getElementById('prenom').textContent = CONFIG.prenomFemme;
+  document.getElementById('btnPrenom').textContent = CONFIG.votrePrenom;
+
+  // Heure
+  function updateTime() {
+    const now = new Date();
+    const jours = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('timeDisplay').textContent =
+      `${h}h${m} · ${jours[now.getDay()]} ${now.getDate()} ${mois[now.getMonth()]}`;
+  }
+  updateTime();
+  setInterval(updateTime, 30000);
+
+  // Position GPS
+  let lastLat = null, lastLng = null, lastAddress = null;
+
+  function getPosition(callback) {
+    if (!navigator.geolocation) { callback(null, null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        lastLat = pos.coords.latitude;
+        lastLng = pos.coords.longitude;
+        callback(lastLat, lastLng);
+      },
+      () => callback(lastLat, lastLng),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  // Obtenir adresse depuis coordonnées (geocoding inverse)
+  async function getAddress(lat, lng) {
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const d = await r.json();
+      return d.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    } catch {
+      return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    }
+  }
+
+  // Mise à jour position affichée
+  async function updatePositionCard() {
+    getPosition(async (lat, lng) => {
+      if (lat) {
+        const addr = await getAddress(lat, lng);
+        lastAddress = addr;
+        const short = addr.split(',').slice(0,2).join(',');
+        document.getElementById('posAddress').textContent = short;
+        // Sauvegarder position dans Firebase toutes les 5 min
+        savePosition(lat, lng, addr, 'auto');
+      }
+    });
+  }
+  updatePositionCard();
+  setInterval(updatePositionCard, 5 * 60 * 1000);
+
+  // Sauvegarder position dans Firebase
+  async function savePosition(lat, lng, address, type) {
+    if (!window.firebaseReady) return;
+    try {
+      await window.fbAddDoc(
+        window.fbCollection(window.db, 'positions'),
+        {
+          lat, lng, address, type,
+          mapsUrl: `https://maps.google.com/?q=${lat},${lng}`,
+          timestamp: window.fbServerTimestamp()
+        }
+      );
+    } catch(e) { console.error('Firebase erreur:', e); }
+  }
+
+  // Envoyer SMS via votre backend (Twilio)
+  // ⚠️ Vous devrez créer un petit serveur ou utiliser une Cloud Function
+  async function sendSMS(message) {
+    // Pour l'instant on simule — vous brancherez Twilio à l'étape 3
+    console.log('📱 SMS à envoyer:', CONFIG.votreTelephone, message);
+    // Décommentez quand votre backend sera prêt :
+    /*
+    await fetch('https://votre-backend.vercel.app/send-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: CONFIG.votreTelephone, message })
+    });
+    */
+    return true;
+  }
+
+  // ===== SOS =====
+  function openSOS() {
+    document.getElementById('sosModal').classList.add('show');
+  }
+
+  function closeSOS() {
+    document.getElementById('sosModal').classList.remove('show');
+  }
+
+  async function confirmSOS() {
+    closeSOS();
+    showLoading('Envoi de l\'alerte...');
+
+    getPosition(async (lat, lng) => {
+      const mapsUrl = lat
+        ? `https://maps.google.com/?q=${lat},${lng}`
+        : 'Position non disponible';
+
+      const address = lat ? await getAddress(lat, lng) : 'Adresse inconnue';
+      const shortAddr = address.split(',').slice(0,2).join(',');
+
+      const message = `🆘 ALERTE SOS — ${CONFIG.prenomFemme} a besoin d'aide !\n📍 Position : ${shortAddr}\n🗺️ Carte : ${mapsUrl}`;
+
+      await sendSMS(message);
+      if (lat) await savePosition(lat, lng, address, 'sos');
+
+      hideLoading();
+      document.getElementById('successModal').classList.add('show');
+    });
+  }
+
+  function closeSuccess() {
+    document.getElementById('successModal').classList.remove('show');
+  }
+
+  // ===== POSITION =====
+  async function sendPosition() {
+    showLoading('Envoi de votre position...');
+
+    getPosition(async (lat, lng) => {
+      if (!lat) { hideLoading(); showToast('❌ Position indisponible'); return; }
+
+      const address = await getAddress(lat, lng);
+      const shortAddr = address.split(',').slice(0,2).join(',');
+      const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
+
+      const message = `📍 ${CONFIG.prenomFemme} vous envoie sa position\n📌 ${shortAddr}\n🗺️ Voir sur carte : ${mapsUrl}`;
+
+      await sendSMS(message);
+      await savePosition(lat, lng, address, 'manuel');
+
+      hideLoading();
+      showToast('📍 Position envoyée avec succès !');
+    });
+  }
+
+  // ===== PHOTO =====
+  function openPhoto() {
+    document.getElementById('photoModal').classList.add('show');
+  }
+
+  function closePhoto() {
+    document.getElementById('photoModal').classList.remove('show');
+  }
+
+  function takePhoto(source) {
+    closePhoto();
+    const input = document.getElementById('fileInput');
+    if (source === 'camera') {
+      input.setAttribute('capture', 'environment');
+    } else {
+      input.removeAttribute('capture');
+    }
+    input.click();
+  }
+
+  async function photoSelected(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    showLoading('Envoi de la photo...');
+
+    try {
+      // Upload dans Firebase Storage
+      if (window.firebaseReady) {
+        const storageRef = window.fbRef(window.storage, `photos/${Date.now()}_${file.name}`);
+        await window.fbUploadBytes(storageRef, file);
+        const downloadUrl = await window.fbGetDownloadURL(storageRef);
+
+        // SMS avec lien photo
+        const message = `📸 ${CONFIG.prenomFemme} vous envoie une photo\n🖼️ Voir : ${downloadUrl}`;
+        await sendSMS(message);
+
+        // Sauvegarder en base
+        getPosition(async (lat, lng) => {
+          await window.fbAddDoc(
+            window.fbCollection(window.db, 'photos'),
+            {
+              photoUrl: downloadUrl,
+              lat: lat || null, lng: lng || null,
+              timestamp: window.fbServerTimestamp()
+            }
+          );
+        });
+
+        hideLoading();
+        showToast('📸 Photo envoyée à votre mari !');
+      } else {
+        hideLoading();
+        showToast('📸 Photo reçue (Firebase non connecté)');
+      }
+    } catch(e) {
+      hideLoading();
+      showToast('❌ Erreur envoi photo');
+      console.error(e);
+    }
+
+    input.value = '';
+  }
+
+  // ===== APPEL =====
+  function callHusband() {
+    if (CONFIG.votreTelephone && CONFIG.votreTelephone !== '+33600000000') {
+      window.location.href = `tel:${CONFIG.votreTelephone}`;
+    } else {
+      showToast('📞 Configurez votre numéro dans CONFIG');
+    }
+  }
+
+  // ===== JE VAIS BIEN =====
+  async function sendOK() {
+    showLoading('Envoi du message...');
+
+    getPosition(async (lat, lng) => {
+      const mapsUrl = lat ? `https://maps.google.com/?q=${lat},${lng}` : '';
+      const message = `✅ ${CONFIG.prenomFemme} va bien !\n💛 Elle vous envoie ce message pour vous rassurer.${mapsUrl ? '\n📍 Sa position : ' + mapsUrl : ''}`;
+
+      await sendSMS(message);
+      hideLoading();
+      showToast('✅ Message envoyé : "Je vais bien !" 💛');
+    });
+  }
+
+  // ===== UTILITAIRES =====
+  function showLoading(text) {
+    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingOverlay').classList.add('show');
+  }
+
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+</script>
+
+<!--
+==========================================================
+  📋 GUIDE DE CONFIGURATION — LISEZ CECI !
+==========================================================
+
+ÉTAPE 1 — FIREBASE (5 minutes)
+--------------------------------
+1. Allez sur https://firebase.google.com
+2. Connectez-vous avec votre Gmail
+3. Cliquez "Créer un projet" → appelez-le "suivi-alzheimer"
+4. Désactivez Google Analytics → Créer
+5. Dans le menu gauche → "Firestore Database" → Créer
+   Choisissez "Mode test" pour commencer
+6. Dans le menu gauche → "Storage" → Démarrer
+   Choisissez "Mode test"
+7. Cliquez l'icône </> (Web) pour enregistrer votre app
+8. Copiez les infos apiKey, authDomain, etc.
+   et remplacez-les dans CONFIG.firebase en haut du fichier
+
+ÉTAPE 2 — NUMÉROS DE TÉLÉPHONE
+--------------------------------
+Dans CONFIG en haut du fichier :
+- Remplacez +33600000000 par VOTRE vrai numéro
+- Changez "Chérie" par le prénom de votre femme
+- Changez "Mon Mari" par votre prénom
+
+ÉTAPE 3 — SMS TWILIO (prochaine étape)
+----------------------------------------
+Je vous préparerai un mini serveur gratuit sur Vercel
+qui enverra les vrais SMS depuis Twilio.
+Pour l'instant tout est sauvegardé dans Firebase
+et vous pouvez voir les alertes dans la console Firebase.
+
+POUR TESTER MAINTENANT :
+- Ouvrez ce fichier dans Chrome sur votre téléphone
+- Les boutons fonctionnent
+- Les positions sont sauvegardées dans Firebase
+- Les SMS apparaissent dans la console (F12)
+
+==========================================================
+-->
+</body>
+</html>
